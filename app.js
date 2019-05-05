@@ -1,7 +1,6 @@
 var express = require('express');
 var app = express();
 const cors = require('cors');
-var cities = {cities:["Amsterdam","Berlin","New York","San Francisco","Tokyo"]}
 const Pool = require('pg').Pool
 const pool = new Pool({
   user: 'postgres',
@@ -10,19 +9,21 @@ const pool = new Pool({
   password: 'admin',
   port: 5432,
 });
-
+app.configure(function () {
+  app.use(express.bodyParser());
+})
 app.use(cors());
 
-app.get('/peliculas', async function(req, res){
+app.get('/peliculas', async function (req, res) {
   pool.query('SELECT * FROM pelicula', (error, results) => {
     if (error) {
-      throw error
+      throw errorno
     }
     res.status(200).json(results.rows)
   });
 });
 
-app.get('/peliculas/:id', async function(req, res){
+app.get('/peliculas/:id', async function (req, res) {
   const { id } = req.params;
   pool.query(`SELECT * FROM pelicula WHERE id='${id}'`, (error, results) => {
     if (error) {
@@ -32,8 +33,23 @@ app.get('/peliculas/:id', async function(req, res){
   });
 });
 
+app.post('/login', async function (req, res) {
+  const { email, pass } = req.body;
+  pool.query(`SELECT * FROM empleado WHERE email='${email}' AND pass=MD5('${pass}')`, (error, results) => {
+    if (error) {
+      throw error
+    }
+    console.log(results.rows);
+    if (results.rows.length > 0){
+      res.status(200).json(results.rows)
+    }
+    else{
+      res.status(404).json('Datos invalidos')
+    }
+  });
 
+})
 var port = process.env.PORT || 8080;
-app.listen(port, () => console.log(`Listening on ${ port }`));
+app.listen(port, () => console.log(`Listening on ${port}`));
 
 module.exports = app;
