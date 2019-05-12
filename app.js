@@ -40,15 +40,31 @@ app.post('/login', async function (req, res) {
       throw error
     }
     console.log(results.rows);
-    if (results.rows.length > 0){
+    if (results.rows.length > 0) {
       res.status(200).json(results.rows)
     }
-    else{
+    else {
       res.status(404).json('Datos invalidos')
     }
   });
-
 })
+
+app.post('/peliculas', async function (req, res) {
+  const { name, length, classification } = req.body;
+  const { genre, synopsis, starring } = req.body;
+  const { url, projection } = req.body;
+  console.log(`INSERT INTO pelicula(nombre, sinopsis, duracion, reparto, clasificacion, tipo_proyeccion, genero, imagen) 
+  VALUES ('${name}', '${synopsis}', '${length}', '${starring}', '${classification}', '${projection}', '${genre}', '${url}') RETURNING *`);
+  pool.query(`INSERT INTO pelicula(nombre, sinopsis, duracion, reparto, clasificacion, tipo_proyeccion, genero, imagen) 
+  VALUES ('${name}', '${synopsis}', '${length}', '${starring}', '${classification}', '${projection}', '${genre}', '${url}') RETURNING *`, (error, results) => {
+      if (error) {
+        res.status(404).json(error)
+      }
+      console.log(results);
+      res.status(200).json('Guardado exitoso');
+    })
+});
+
 var port = process.env.PORT || 8080;
 app.listen(port, () => console.log(`Listening on ${port}`));
 
