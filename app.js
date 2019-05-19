@@ -60,9 +60,29 @@ app.post('/peliculas', async function (req, res) {
       if (error) {
         res.status(404).json(error)
       }
-      console.log(results);
+      console.log(results.rows);
       res.status(200).json('Guardado exitoso');
     })
+});
+
+app.get('/peliculas/:id/cartelera', async function (req, res) {
+  const { id } = req.params;
+  pool.query(`SELECT * FROM cartelera WHERE pelicula='${id}'`, (error, results) => {
+    if (error) {
+      throw error
+    }
+    res.status(200).json(results.rows)
+  });
+});
+
+app.get('/salas/:id', async function (req, res) {
+  const { id } = req.params;
+  pool.query(`SELECT * FROM sala WHERE id='${id}'`, (error, results) => {
+    if (error) {
+      throw error
+    }
+    res.status(200).json(results.rows)
+  });
 });
 
 var port = process.env.PORT || 8080;
