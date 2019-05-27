@@ -39,7 +39,6 @@ app.post('/login', async function (req, res) {
     if (error) {
       throw error
     }
-    console.log(results.rows);
     if (results.rows.length > 0) {
       res.status(200).json(results.rows)
     }
@@ -53,14 +52,11 @@ app.post('/peliculas', async function (req, res) {
   const { name, length, classification } = req.body;
   const { genre, synopsis, starring } = req.body;
   const { url, projection } = req.body;
-  console.log(`INSERT INTO pelicula(nombre, sinopsis, duracion, reparto, clasificacion, tipo_proyeccion, genero, imagen) 
-  VALUES ('${name}', '${synopsis}', '${length}', '${starring}', '${classification}', '${projection}', '${genre}', '${url}') RETURNING *`);
   pool.query(`INSERT INTO pelicula(nombre, sinopsis, duracion, reparto, clasificacion, tipo_proyeccion, genero, imagen) 
   VALUES ('${name}', '${synopsis}', '${length}', '${starring}', '${classification}', '${projection}', '${genre}', '${url}') RETURNING *`, (error, results) => {
       if (error) {
         res.status(404).json(error)
       }
-      console.log(results.rows);
       res.status(200).json('Guardado exitoso');
     })
 });
@@ -78,6 +74,39 @@ app.get('/peliculas/:id/cartelera', async function (req, res) {
 app.get('/salas/:id', async function (req, res) {
   const { id } = req.params;
   pool.query(`SELECT * FROM sala WHERE id='${id}'`, (error, results) => {
+    if (error) {
+      throw error
+    }
+    res.status(200).json(results.rows)
+  });
+});
+
+
+app.post('/tickets', async function (req, res) {
+  const { folio, billboard, ticketNumber } = req.body;
+  const { seatNumber, customerName, creditCard } = req.body;
+  pool.query(`INSERT INTO ticket(folio, cartelera, cantidad_boletos, numero_asiento, nombre_comprador, terminacion_credito) 
+  VALUES ('${folio}', '${billboard}', ${ticketNumber}, ARRAY[${seatNumber}], '${customerName}', '${creditCard}') RETURNING *`, (error, results) => {
+      if (error) {
+        res.status(404).json(error)
+      }
+      res.status(200).json(results.rows[0].id);
+    })
+});
+
+app.get('/tickets/:id', async function (req, res) {
+  const { id } = req.params;
+  pool.query(`SELECT * FROM ticket WHERE id='${id}'`, (error, results) => {
+    if (error) {
+      throw error
+    }
+    res.status(200).json(results.rows)
+  });
+});
+
+app.get('/cartelera/:id', async function (req, res) {
+  const { id } = req.params;
+  pool.query(`SELECT * FROM cartelera WHERE id='${id}'`, (error, results) => {
     if (error) {
       throw error
     }
